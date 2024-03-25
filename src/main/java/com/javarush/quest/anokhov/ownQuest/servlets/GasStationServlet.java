@@ -27,16 +27,31 @@ public class GasStationServlet extends HttpServlet {
 
         Player player = (Player) session.getAttribute("player");
         String action = request.getParameter("action");
-        player.setGasStation(true);
+
+        if (action == null || action.isEmpty()) {
+            request.getRequestDispatcher("locationPage.jsp").forward(request, response);
+            return;
+        }
+
         correctAnswers = (Map<String, String>) request.getAttribute("correctAnswers");
         incorrectAnswers = (Map<String, String>) request.getAttribute("incorrectAnswers");
+
+        if (!player.isGasStation()){
+        player.decreaseChemicalProtection();
+        if (player.getChemicalProtection() <= 0) {
+            session.setAttribute("message", incorrectAnswers.get("DIE_FROM_RADIATION"));
+            response.sendRedirect("restart?dead=true");
+            return;}
+        }
+
+        player.setGasStation(true);
+
         if ("usePistol".equals(action)) {
             player.setUsePistol(true);
             if (player.getPistolMagazines() == 0) {
                 ServletUtil.setEnd(request, incorrectAnswers.get("EMPTY_MAGAZINES"));
             } else {
-                player.setPistolMagazines(player.getPistolMagazines() - 1);
-                player.setPistolMagazines(player.getPistolMagazines() + 1); //можно и убрать, но вдруг что-то нужно поменять
+                //логика для прибавление и уменьшения магазинов убрана
                 player.findCanister();
                 ServletUtil.setContinue(request, correctAnswers.get("RAIDERS_WIN_WITH_PISTOL"), generateActions(request));
             }
@@ -48,6 +63,7 @@ public class GasStationServlet extends HttpServlet {
             player.setUseHands(true);
             ServletUtil.setEnd(request, incorrectAnswers.get("RAIDERS_LOSE_USE_HANDS"));
         }
+
         if(player.checkSkills()) {
             request.getRequestDispatcher("resultPage.jsp").forward(request,response);
         }

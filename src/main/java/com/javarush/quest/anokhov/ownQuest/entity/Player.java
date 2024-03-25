@@ -28,14 +28,14 @@ public class Player {
         pistol=false;
         pistolMagazines=0;
         shovel=false;
-        chemicalProtection=1;
+        chemicalProtection=0;
         canisters=0;
     }
     public void findPistol(){
         this.pistol=true;
     }
     public void findChemicalProtection(){
-        this.chemicalProtection=chemicalProtection+10;
+        this.chemicalProtection=chemicalProtection+7;
     }
     public void findShovel (){
         this.shovel=true;

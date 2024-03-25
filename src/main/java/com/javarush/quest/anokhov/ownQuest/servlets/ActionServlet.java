@@ -22,28 +22,31 @@ public class ActionServlet  extends HttpServlet {
     private Map<String, String> incorrectAnswers ;
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        System.out.println("ВЫЗОВ ВЫЗОВ ВЫЗОВ СЕРВЛЕТА!");
         HttpSession session = request.getSession();
 
         Player player = (Player) session.getAttribute("player");
         String action = request.getParameter("action");
         String locationType = request.getParameter("currentLocation");
         Locations currentLocation = Locations.valueOf(locationType);
-        System.out.println("ПРОВЕРКА 1");
-        request.setAttribute("currentLocation", currentLocation);
-        System.out.println("Проверка локации " + currentLocation);
 
+        correctAnswers = (Map<String, String>) request.getAttribute("correctAnswers");
+        incorrectAnswers = (Map<String, String>) request.getAttribute("incorrectAnswers");
+
+        request.setAttribute("currentLocation", currentLocation);
+        if (player.getChemicalProtection() <= 0) {
+            session.setAttribute("message", incorrectAnswers.get("DIE_FROM_RADIATION"));
+            response.sendRedirect("restart?dead=true");
+            return;
+        }
         if (locationType != null && !locationType.isEmpty()) {
             try {
                 currentLocation = Locations.valueOf(locationType);
             } catch (IllegalArgumentException e) {
-                System.out.println("Некорректное значение для currentLocation: " + locationType);
-                // Здесь можно добавить логику обработки некорректного значения
+                System.out.println("incorrect currentLocation: " + locationType);
             }
         }
         if (currentLocation != null) {
             request.setAttribute("currentLocation", currentLocation);
-            System.out.println("Проверка локации: " + currentLocation);
 
             switch (currentLocation) {
                 case DOGS_HOUSE:
@@ -62,23 +65,17 @@ public class ActionServlet  extends HttpServlet {
             }
 
         } else {
-            // Если currentLocation null, перенаправляем на страницу с ошибкой или начальную страницу
-            System.out.println("currentLocation не установлен.");
             request.setAttribute("message", "Location is not set.");
-            request.getRequestDispatcher("/errorPage.jsp").forward(request, response);
+            request.getRequestDispatcher("/errorPage.jsp").forward(request, response); //не реализовано
             return;
         }
-
-
             request.getRequestDispatcher("resultPage.jsp").forward(request, response);
     }
 
 
     private void handleDogsHouse(HttpServletRequest request,HttpServletResponse response, Player player, String action) throws ServletException, IOException {
-        correctAnswers = (Map<String, String>) request.getAttribute("correctAnswers");
-        incorrectAnswers = (Map<String, String>) request.getAttribute("incorrectAnswers");
+
         if ("usePistol".equals(action)) {
-            System.out.println(" выбрал пистолет ");
             if (player.getPistolMagazines() == 0) {
                 ServletUtil.setEnd(request, incorrectAnswers.get("EMPTY_MAGAZINES"));
             } else {
@@ -95,8 +92,7 @@ public class ActionServlet  extends HttpServlet {
 
 
     private void handleBearHouse(HttpServletRequest request,HttpServletResponse response, Player player, String action) throws ServletException, IOException {
-        correctAnswers = (Map<String, String>) request.getAttribute("correctAnswers");
-        incorrectAnswers = (Map<String, String>) request.getAttribute("incorrectAnswers");
+
         if ("usePistol".equals(action)) {
             if (player.getPistolMagazines() == 0) {
                 ServletUtil.setEnd(request, incorrectAnswers.get("EMPTY_MAGAZINES"));
@@ -113,7 +109,7 @@ public class ActionServlet  extends HttpServlet {
         } else if ("useShovel".equals(action)) {
             if (!player.isPistol()) {
                 ServletUtil.setEnd(request, incorrectAnswers.get("BEAR_LOSE_USE_SHOVEL"));
-            } else if (player.isPistol() && player.getPistolMagazines() == 0) {
+            } else if ( player.getPistolMagazines() == 0) {
                 ServletUtil.setEnd(request, incorrectAnswers.get("BEAR_LOSE_USE_SHOVEL_AND_EMPTY_PISTOL"));
             } else {
                 player.setPistolMagazines(player.getPistolMagazines() - 1);
@@ -136,12 +132,10 @@ public class ActionServlet  extends HttpServlet {
             actions.add(new Action("gasStation", actionChoices.get("GO_TO_GAS_STATION")));
             HttpSession session = request.getSession();
             session.setAttribute("currentLocation",Locations.GAS_STATION);
-            System.out.println("ДОБАВЛЕНА КНОПКА");
-            System.out.println("currentLocation из класса" + session.getAttribute("currentLocation"));
         }
         actions.add(new Action("wasteland", actionChoices.get("BACK_TO_WASTELAND")));
         actions.add(new Action("restart?returnToBunker=true", actionChoices.get("BACK_TO_BUNKER")));
-
+       // player.decreaseChemicalProtection();
         return actions;
     }
 }

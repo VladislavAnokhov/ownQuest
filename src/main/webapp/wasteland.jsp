@@ -34,6 +34,7 @@
 
 <% if (session.getAttribute("player") != null) {
     Player player = (Player) session.getAttribute("player");
+    player.decreaseChemicalProtection();
 %>
 <div class="stats">
     <p>Игрок: <%= player.getName() %></p>
@@ -41,11 +42,11 @@
     <p>Побед: <%= player.getTotalWins() %></p>
     <p>Магазины к пистолету: <%= player.getPistolMagazines() %> </p>
     <p>Количество канистр: <%= player.getCanisters() %></p>
-    <p>ЗАЩИТА СЕЙЧАС <%= player.getChemicalProtection() %> </p>
+    <p>Защита от радиации: <%= player.getChemicalProtection() %> </p>
     <% if (player.isPistol()) { %>
     🔫
     <% } %>
-    <% if (player.getChemicalProtection()>1) { %>
+    <% if (player.getChemicalProtection()>0) { %>
     🥼
     <% } %>
     <% if (player.isShovel()) { %>

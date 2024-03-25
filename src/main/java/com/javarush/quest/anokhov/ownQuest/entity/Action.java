@@ -12,6 +12,8 @@ public class Action {
     public Action(String name, String description) {
         this.name = name;
         this.description = description;
+
+
     }
     public  String getWasteland(){
         return "wasteland";

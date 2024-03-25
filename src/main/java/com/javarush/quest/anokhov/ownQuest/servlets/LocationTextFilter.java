@@ -11,7 +11,7 @@ import java.util.Map;
 
 @WebFilter("/*")
 public class LocationTextFilter implements Filter {
-    private ObjectMapper mapper = new ObjectMapper();
+    protected ObjectMapper mapper = new ObjectMapper();
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         servletRequest.setAttribute("mainText",loadTexts("/mainText.json"));

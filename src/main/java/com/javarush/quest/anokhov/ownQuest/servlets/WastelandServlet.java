@@ -28,6 +28,13 @@ public class WastelandServlet extends HttpServlet {
             response.sendRedirect("wasteland.jsp");
             return;
         }
+
+
+        if (player.getChemicalProtection() <= 0) {
+            session.setAttribute("message", incorrectAnswers.get("DIE_FROM_RADIATION"));
+            response.sendRedirect("restart?dead=true");
+            return;
+        }
         switch (direction) {
             case "left":
                 if (!player.isBearDen()) {
@@ -42,6 +49,7 @@ public class WastelandServlet extends HttpServlet {
                     player.setBearDen(true);
                 } else {
                     session.setAttribute("message",otherText.get("WAS_ALREADY") );
+                    player.setChemicalProtection(player.getChemicalProtection()+1);
                     response.sendRedirect("wasteland.jsp");
                 }
                 break;
@@ -58,6 +66,7 @@ public class WastelandServlet extends HttpServlet {
                     player.setDogsDen(true);
                 } else {
                     session.setAttribute("message", otherText.get("WAS_ALREADY"));
+                    player.setChemicalProtection(player.getChemicalProtection()+1);
                     response.sendRedirect("wasteland.jsp");
                 }
                 break;
@@ -67,6 +76,7 @@ public class WastelandServlet extends HttpServlet {
                     if (player.getChemicalProtection() <= 0) {
                         session.setAttribute("message", incorrectAnswers.get("DIE_FROM_RADIATION"));
                         response.sendRedirect("restart?dead=true");
+
                         return;
                     }
                     request.setAttribute("currentLocation",Locations.GAS_STATION);
@@ -74,10 +84,12 @@ public class WastelandServlet extends HttpServlet {
                     player.setGasStation(true);
                 } else {
                     session.setAttribute("message", otherText.get("WAS_ALREADY"));
+                    player.setChemicalProtection(player.getChemicalProtection()+1);
                     response.sendRedirect("wasteland.jsp");
                 }
                 break;
             case "back":
+                player.setChemicalProtection(player.getChemicalProtection()+1);
                 response.sendRedirect("restart?returnToBunker=true");
                 break;
             default:
